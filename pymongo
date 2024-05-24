@@ -1,5 +1,6 @@
 import pymongo
 import tkinter as tk
+import json
 from tkinter import messagebox, simpledialog, scrolledtext
 
 # Función para conectarse a la base de datos MongoDB
@@ -11,6 +12,22 @@ def conectar_mongodb():
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo conectar a MongoDB: {e}")
         return None
+
+# Función para consultar datos y guardarlos en un archivo JSON
+def consultar_datos_y_guardar(coleccion):
+    db = conectar_mongodb()
+    if db:
+        try:
+            datos = list(db[coleccion].find())
+            with open(f"{coleccion}.json", "w") as archivo_json:
+                json.dump(datos, archivo_json, indent=4)
+            messagebox.showinfo("Éxito", f"Datos de {coleccion} guardados en {coleccion}.json exitosamente.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al consultar y guardar los datos de {coleccion}: {e}")
+
+btn_consultar_librerias = tk.Button(root, text="Seleccionar todas las librerías", 
+                                    command=lambda: consultar_datos_y_guardar("Libreria"))
+btn_consultar_librerias.pack()
 
 # Funciones para manipular la base de datos
 def insertar_datos_libreria():
