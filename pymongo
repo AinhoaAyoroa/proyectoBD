@@ -1,0 +1,180 @@
+import pymongo
+import tkinter as tk
+from tkinter import messagebox, simpledialog, scrolledtext
+
+# Función para conectarse a la base de datos MongoDB
+def conectar_mongodb():
+    try:
+        client = pymongo.MongoClient("mongodb://localhost:27017/")
+        db = client["proyectoAinhoaAyoroa"]
+        return db
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo conectar a MongoDB: {e}")
+        return None
+
+# Funciones para manipular la base de datos
+def insertar_datos_libreria():
+    cod_libreria = simpledialog.askinteger("Insertar Librería", "Ingrese el código de la librería:")
+    direccion = simpledialog.askstring("Insertar Librería", "Ingrese la dirección de la librería:")
+    tel = simpledialog.askstring("Insertar Librería", "Ingrese el teléfono de la librería:")
+    if cod_libreria is not None and direccion and tel:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Libreria.insert_one({
+                    "cod_libreria": cod_libreria,
+                    "direccion": direccion,
+                    "tel": tel
+                })
+                messagebox.showinfo("Éxito", "Librería insertada exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al insertar la librería: {e}")
+
+def insertar_datos_libro():
+    cod_libro = simpledialog.askinteger("Insertar Libro", "Ingrese el código del libro:")
+    nombre = simpledialog.askstring("Insertar Libro", "Ingrese el nombre del libro:")
+    autor = simpledialog.askstring("Insertar Libro", "Ingrese el autor del libro:")
+    stock = simpledialog.askinteger("Insertar Libro", "Ingrese el stock del libro:")
+    if cod_libro is not None and nombre and autor and stock is not None:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Libro.insert_one({
+                    "cod_libro": cod_libro,
+                    "nombre": nombre,
+                    "autor": autor,
+                    "stock": stock
+                })
+                messagebox.showinfo("Éxito", "Libro insertado exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al insertar el libro: {e}")
+
+def insertar_datos_ventas():
+    cod_libreria = simpledialog.askinteger("Insertar Venta", "Ingrese el código de la librería:")
+    cod_libro = simpledialog.askinteger("Insertar Venta", "Ingrese el código del libro:")
+    precio = simpledialog.askfloat("Insertar Venta", "Ingrese el precio del libro:")
+    cantidad = simpledialog.askinteger("Insertar Venta", "Ingrese la cantidad vendida del libro:")
+    if cod_libreria is not None and cod_libro is not None and precio is not None and cantidad is not None:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Vende.insert_one({
+                    "cod_libreria": cod_libreria,
+                    "cod_libro": cod_libro,
+                    "precio": precio,
+                    "cantidad": cantidad
+                })
+                messagebox.showinfo("Éxito", "Venta insertada exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al insertar la venta: {e}")
+
+def actualizar_stock_libro():
+    cod_libro = simpledialog.askinteger("Actualizar Stock", "Ingrese el código del libro:")
+    nuevo_stock = simpledialog.askinteger("Actualizar Stock", "Ingrese el nuevo stock del libro:")
+    if cod_libro is not None and nuevo_stock is not None:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Libro.update_one(
+                    {"cod_libro": cod_libro},
+                    {"$set": {"stock": nuevo_stock}}
+                )
+                messagebox.showinfo("Éxito", "Stock actualizado exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al actualizar el stock: {e}")
+
+def actualizar_precio_libro_libreria():
+    cod_libreria = simpledialog.askinteger("Actualizar Precio", "Ingrese el código de la librería:")
+    cod_libro = simpledialog.askinteger("Actualizar Precio", "Ingrese el código del libro:")
+    nuevo_precio = simpledialog.askfloat("Actualizar Precio", "Ingrese el nuevo precio del libro:")
+    if cod_libreria is not None, cod_libro is not None, nuevo_precio is not None:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Vende.update_one(
+                    {"cod_libreria": cod_libreria, "cod_libro": cod_libro},
+                    {"$set": {"precio": nuevo_precio}}
+                )
+                messagebox.showinfo("Éxito", "Precio actualizado exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al actualizar el precio: {e}")
+
+def eliminar_libreria_y_registros_relacionados():
+    cod_libreria = simpledialog.askinteger("Eliminar Librería", "Ingrese el código de la librería:")
+    if cod_libreria is not None:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Libreria.delete_one({"cod_libreria": cod_libreria})
+                db.Vende.delete_many({"cod_libreria": cod_libreria})
+                messagebox.showinfo("Éxito", "Librería y registros relacionados eliminados exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al eliminar la librería y registros relacionados: {e}")
+
+def eliminar_libro_y_registros_relacionados():
+    cod_libro = simpledialog.askinteger("Eliminar Libro", "Ingrese el código del libro:")
+    if cod_libro is not None:
+        db = conectar_mongodb()
+        if db:
+            try:
+                db.Libro.delete_one({"cod_libro": cod_libro})
+                db.Vende.delete_many({"cod_libro": cod_libro})
+                messagebox.showinfo("Éxito", "Libro y registros relacionados eliminados exitosamente.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al eliminar el libro y registros relacionados: {e}")
+
+# Función para ejecutar una consulta y mostrar los resultados
+def consultar_datos(coleccion):
+    db = conectar_mongodb()
+    if db:
+        try:
+            datos = db[coleccion].find()
+            ventana_resultados = tk.Toplevel()
+            ventana_resultados.title("Resultados de la consulta")
+            resultados_texto = scrolledtext.ScrolledText(ventana_resultados, width=50, height=20)
+            resultados_texto.pack()
+            for dato in datos:
+                resultados_texto.insert(tk.END, str(dato) + '\n')
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al consultar los datos: {e}")
+
+# Crear la ventana principal
+root = tk.Tk()
+root.title("Operaciones de Base de Datos")
+
+# Botones para manipular la base de datos
+btn_insertar_libreria = tk.Button(root, text="Insertar datos en la tabla Librería", command=insertar_datos_libreria)
+btn_insertar_libreria.pack()
+
+btn_insertar_libro = tk.Button(root, text="Insertar datos en la tabla Libro", command=insertar_datos_libro)
+btn_insertar_libro.pack()
+
+btn_insertar_ventas = tk.Button(root, text="Insertar datos en la tabla Vende", command=insertar_datos_ventas)
+btn_insertar_ventas.pack()
+
+btn_actualizar_stock = tk.Button(root, text="Actualizar stock de un libro", command=actualizar_stock_libro)
+btn_actualizar_stock.pack()
+
+btn_actualizar_precio = tk.Button(root, text="Actualizar precio de un libro de una librería", command=actualizar_precio_libro_libreria)
+btn_actualizar_precio.pack()
+
+btn_eliminar_libreria = tk.Button(root, text="Eliminar una librería y sus registros relacionados de ventas", command=eliminar_libreria_y_registros_relacionados)
+btn_eliminar_libreria.pack()
+
+btn_eliminar_libro = tk.Button(root, text="Eliminar un libro y sus registros relacionados de ventas", command=eliminar_libro_y_registros_relacionados)
+btn_eliminar_libro.pack()
+
+# Consultas de datos
+lbl_consultas = tk.Label(root, text="Consultas de datos:")
+lbl_consultas.pack()
+
+btn_consultar_librerias = tk.Button(root, text="Seleccionar todas las librerías", command=lambda: consultar_datos("Libreria"))
+btn_consultar_librerias.pack()
+
+btn_consultar_libros = tk.Button(root, text="Seleccionar todos los libros", command=lambda: consultar_datos("Libro"))
+btn_consultar_libros.pack()
+
+btn_consultar_ventas = tk.Button(root, text="Seleccionar todas las ventas", command=lambda: consultar_datos("Vende"))
+btn_consultar_ventas.pack()
+
+root.mainloop()
