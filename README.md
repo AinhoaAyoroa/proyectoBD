@@ -26,14 +26,13 @@ El proyecto "Gestión de Librerías" tiene como objetivo principal desarrollar u
 
 ## Estructura del Repositorio
 
-- **proyecto.py:** Archivo principal que contiene el código Python para la interfaz gráfica y las operaciones de base de datos.
-- **README.md:** Este archivo, que proporciona información detallada sobre el proyecto y su funcionamiento.
+- **pymongo:** Archivo principal que contiene el código Python para la interfaz gráfica y las operaciones de base de datos.
 
 ## Uso del Proyecto
 
 1. Clona el repositorio a tu máquina local.
 2. Asegúrate de tener MongoDB instalado y en funcionamiento en tu sistema.
-3. Ejecuta el archivo proyecto.py para abrir la interfaz gráfica.
+3. Ejecuta el archivo pymongo.
 4. Utiliza los botones de la interfaz para realizar diversas operaciones, como añadir librerías, libros, ventas, etc.
 5. Explora las funcionalidades ofrecidas y adapta el proyecto según tus necesidades.
 
